@@ -1,7 +1,6 @@
-from PySide6.QtWidgets import *
-from PySide6.QtUiTools import *
+from PyQt6.QtWidgets import *
 from threading import Thread
-from PySide6.QtCore import Signal
+from PyQt6.QtCore import pyqtSignal
 import traceback
 from  guiFiles.main_ui import Ui_Form
 from videoDownloader import VideoDownloader
@@ -10,7 +9,7 @@ from videoDownloader import VideoDownloader
 
 #自定义信号
 class FinishSignals(QWidget):
-    text_print = Signal(QTextBrowser, str)
+    text_print = pyqtSignal(str)
 
 #加载UILoader
 # uiloader = QUiLoader()
@@ -38,8 +37,8 @@ class Downloader(QWidget, Ui_Form):
         self.ui.clearButton.clicked.connect(self.clearText)
 
     #打印信号处理
-    def printToGui(self, fb, text):
-        fb.append(str(text))
+    def printToGui(self, text):
+        self.ui.outBrowser.append(str(text))
 
 
     #清除日志
@@ -70,13 +69,13 @@ class Downloader(QWidget, Ui_Form):
             videoDownloader = VideoDownloader()
             path = videoDownloader.getVideo(url, cookie, outPath, urlDecoder)
             if path != '':
-                self.ms.text_print.emit(self.ui.outBrowser, f"文件已保存在{path}")
-                self.ms.text_print.emit(self.ui.outBrowser, "---------下载成功---------")
+                self.ms.text_print.emit(f"文件已保存在{path}")
+                self.ms.text_print.emit("---------下载成功---------")
 
 
         except Exception as e:
-            self.ms.text_print.emit(self.ui.outBrowser, "---------下载失败---------")                
-            self.ms.text_print.emit(self.ui.outBrowser, traceback.format_exc()) 
+            self.ms.text_print.emit("---------下载失败---------")                
+            self.ms.text_print.emit(traceback.format_exc()) 
 
 
 
