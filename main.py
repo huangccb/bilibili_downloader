@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import *
 from threading import Thread
 from PyQt6.QtCore import pyqtSignal
-import traceback
+import traceback, re, time
 from  guiFiles.main_ui import Ui_Form
 from videoDownloader import VideoDownloader
 
@@ -23,6 +23,9 @@ class Downloader(QWidget, Ui_Form):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
 
+        #设置cookie链接按钮
+        self.ui.linkButton.setUrl("https://blog.csdn.net/qq_28821897/article/details/132002110")
+        
 
         # self.ui = uiloader.load('.\GUI-Files\main.ui')
 
@@ -39,42 +42,49 @@ class Downloader(QWidget, Ui_Form):
     #打印信号处理
     def printToGui(self, text):
         self.ui.outBrowser.append(str(text))
+        self.ui.outBrowser.ensureCursorVisible()
 
 
     #清除日志
     def clearText(self):
         self.ui.outBrowser.clear()
 
+    #处理下载
     def handleCalc(self):
 
         # #获取变量并执行下载任务
-        url = self.ui.urlEdit.text()
+        urlText = re.split(' |\n',self.ui.urlEdit.toPlainText())
         cookie = self.ui.cookieEdit.text()
         urlDecoder = self.ui.comboBox.currentText()
         outPath = self.ui.outPath.text()
+        self.threads = []    #管理线程
 
         thread = Thread(target=self.download,
-                        args=(url, cookie, urlDecoder, outPath)
+                        args=(urlText, cookie, urlDecoder, outPath), daemon=True
 
         )
-
         thread.start()
+        self.threads.append(thread)
 
-        self.ui.outBrowser.append('---------开始下载---------')
-        self.ui.outBrowser.ensureCursorVisible()
+        self.ms.text_print.emit("视频开始下载")
+            
+        
+
+        
 
 
-    def download(self, url, cookie, urlDecoder, outPath):
+    def download(self,urlText, cookie, urlDecoder, outPath):
+
+        videoDownloader = VideoDownloader()
         try:
-            videoDownloader = VideoDownloader()
-            path = videoDownloader.getVideo(url, cookie, outPath, urlDecoder)
-            if path != '':
-                self.ms.text_print.emit(f"文件已保存在{path}")
-                self.ms.text_print.emit("---------下载成功---------")
-
+            path = videoDownloader.getVideo(urlText, cookie, outPath, urlDecoder)
+            if path == '':
+                self.ms.text_print.emit(f"视频下载失败")
+                return
+            self.ms.text_print.emit(f"视频下载成功")
 
         except Exception as e:
-            self.ms.text_print.emit("---------下载失败---------")                
+            self.ms.text_print.emit(f"视频下载失败")                
             self.ms.text_print.emit(traceback.format_exc()) 
 
 
