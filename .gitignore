@@ -1,6 +1,5 @@
 .vscode/
 __pycache__/
 release/
-main.build/
-main.dist/
+main.*/
 icon.ico
