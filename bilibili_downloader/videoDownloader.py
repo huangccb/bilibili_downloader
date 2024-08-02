@@ -19,10 +19,11 @@ class VideoDownloader():
 
         #判断是否使用ffmpeg
         if self.urlDecoder == "ffmpeg":
-            os.system(f"start ffmpeg -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
+            # print(f"start .\\downloader\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
+            os.system(f".\\bilibili_downloader\\downloader\\ffmpeg\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
             # ffmpeg.concat(ffmpeg.input(vdPath), ffmpeg.input(adPath), v=1, a=1).output(putOutPath).run()
         else:
-            os.system(f".\\bilibili_downloader\\downloader\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
+            os.system(f".\\bilibili_downloader\\downloader\\moviepy\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
         return putOutPath
 
 
@@ -69,5 +70,3 @@ class VideoDownloader():
        
         # 合并视频
         result = self.writeVideo(adPath = f"{self.tempPath}\\{self.title}.mp3", vdPath = f"{self.tempPath}\\{self.title}.mp4")
-        checkDownload = [os.path.exists(result), index]
-        return checkDownload
