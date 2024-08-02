@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import *
 from threading import Thread
 from PyQt6.QtCore import pyqtSignal
-import traceback, re, time
+import traceback, re, os
+from multiprocessing import Pool
 from  guiFiles.main_ui import Ui_Form
 from videoDownloader import VideoDownloader
 
@@ -57,33 +58,57 @@ class Downloader(QWidget, Ui_Form):
         cookie = self.ui.cookieEdit.text()
         urlDecoder = self.ui.comboBox.currentText()
         outPath = self.ui.outPath.text()
-        self.threads = []    #管理线程
+        if outPath == '':
+            outPath = os.path.expanduser('~') + '\\Videos'  #设置默认文件夹为视频文件夹
 
         thread = Thread(target=self.download,
                         args=(urlText, cookie, urlDecoder, outPath), daemon=True
 
         )
         thread.start()
-        self.threads.append(thread)
-
-        self.ms.text_print.emit("视频开始下载")
             
         
 
         
 
 
-    def download(self,urlText, cookie, urlDecoder, outPath):
-
-        videoDownloader = VideoDownloader()
+    def download(self,urls, cookie, urlDecoder, outPath):
+        threadList = []
+        pool = Pool(2)
+        self.ms.text_print.emit(f"视频开始下载，保存路径：{outPath}")
+        downloadNum = 0
+        #多线程执行，利用线程池
         try:
-            path = videoDownloader.getVideo(urlText, cookie, outPath, urlDecoder)
-            if path == '':
-                self.ms.text_print.emit(f"视频下载失败")
-                return
-            self.ms.text_print.emit(f"视频下载成功")
+            videoDownloader = VideoDownloader()
+            for url in urls:
+                downloadNum += 1
+
+                threadList.append(pool.apply_async(videoDownloader.getVideo, (url, cookie, outPath, urlDecoder, downloadNum, )))
+                
+            pool.close()
+            pool.join()
+            # allTask = [executor.submit(VideoDownloader.getVideo,  (url, cookie, outPath, urlDecoder, downloadNum)) for url in]
+
+            #获取输出
+            # for t in pool(threadList):
+                # checkDownload = t.get()
+                # if checkDownload[0] == True:
+                #     self.ms.text_print.emit(f"链接{checkDownload[1]}已完成下载")
+                # else:
+                #     self.ms.text_print.emit(f"链接{checkDownload[1]}下载失败")
+            self.ms.text_print.emit("所有视频已完成下载")
+
+
+        # videoDownloader = VideoDownloader()
+        # try:
+        #     path = videoDownloader.getVideo(urlText, cookie, outPath, urlDecoder)
+        #     if path == '':
+        #         self.ms.text_print.emit(f"视频下载失败")
+        #         return
+        #     self.ms.text_print.emit(f"视频下载成功")
 
         except Exception as e:
+            pool.terminate()
             self.ms.text_print.emit(f"视频下载失败")                
             self.ms.text_print.emit(traceback.format_exc()) 
 
