@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'd:\Program\Python\bilibili_downloader\guiFiles\main.ui'
+# Form implementation generated from reading ui file 'd:\Program\Python\bilibili_downloader\bilibili_downloader\guiFiles\main.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -7,18 +7,17 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from qfluentwidgets import setTheme, Theme
+
 
 class Ui_Form(object):
     def setupUi(self, Form):
-        setTheme(Theme.AUTO)
         Form.setObjectName("Form")
         Form.resize(809, 585)
         font = QtGui.QFont()
         font.setPointSize(10)
         Form.setFont(font)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("d:\\Program\\Python\\bilibili_downloader\\guiFiles\\../icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("d:\\Program\\Python\\bilibili_downloader\\bilibili_downloader\\guiFiles\\../icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         Form.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
