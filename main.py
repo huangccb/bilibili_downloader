@@ -3,7 +3,10 @@ from threading import Thread
 from PyQt6.QtCore import pyqtSignal
 import traceback, re, os, tempfile
 from multiprocessing import Pool
-from bilibili_downloader import *
+from videoDownloader import VideoDownloader
+from guiFiles.main_ui import Ui_Form
+
+
 from qfluentwidgets import setTheme, Theme
 #自定义信号
 class FinishSignals(QWidget):
@@ -91,7 +94,7 @@ class Downloader(QWidget, Ui_Form):
 
 
         threadList = []
-        pool = Pool(2)
+        self.pool = Pool(2)
         self.ms.text_print.emit(f"视频开始下载，保存路径：{outPath}")
         downloadNum = 0
         #多线程执行，利用线程池
@@ -100,17 +103,24 @@ class Downloader(QWidget, Ui_Form):
             for url in urls:
                 downloadNum += 1
 
-                threadList.append(pool.apply_async(videoDownloader.getVideo, (url, cookie, outPath, urlDecoder, downloadNum, self.tempPath)))
+                threadList.append(self.pool.apply_async(videoDownloader.getVideo, (url, cookie, outPath, urlDecoder, downloadNum, self.tempPath)))
                 
-            pool.close()
-            pool.join()
+            self.pool.close()
+            self.pool.join()
 
             self.ms.text_print.emit("所有视频已完成下载")
 
         except Exception as e:
-            pool.terminate()
+            self.pool.terminate()
             self.ms.text_print.emit(f"视频下载失败")                
             self.ms.text_print.emit(traceback.format_exc()) 
+
+    #关闭窗口前退出进程池
+    def closeEvent(self, event):
+        self.pool.terminate()
+        event.accept()
+
+
 
     #处理Temp缓存文件夹
     def ckeckTemp(self):
