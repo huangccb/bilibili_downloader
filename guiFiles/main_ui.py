@@ -17,7 +17,7 @@ class Ui_Form(object):
         font.setPointSize(10)
         Form.setFont(font)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("d:\\Program\\Python\\bilibili_downloader\\bilibili_downloader\\guiFiles\\../icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("d:\\Program\\Python\\bilibili_downloader\\bilibili_downloader\\guiFiles\\../../icon.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         Form.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
