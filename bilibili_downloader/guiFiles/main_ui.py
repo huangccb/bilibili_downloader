@@ -7,10 +7,11 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-
+from qfluentwidgets import setTheme, Theme
 
 class Ui_Form(object):
     def setupUi(self, Form):
+        setTheme(Theme.AUTO)
         Form.setObjectName("Form")
         Form.resize(809, 585)
         font = QtGui.QFont()

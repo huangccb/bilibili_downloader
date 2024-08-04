@@ -4,7 +4,7 @@ from PyQt6.QtCore import pyqtSignal
 import traceback, re, os, tempfile
 from multiprocessing import Pool
 from bilibili_downloader import *
-
+from qfluentwidgets import setTheme, Theme
 #自定义信号
 class FinishSignals(QWidget):
     text_print = pyqtSignal(str)
@@ -40,6 +40,7 @@ class Downloader(QWidget, Ui_Form):
         #自定义信号的处理参数
         self.ms = FinishSignals()
         self.ms.text_print.connect(self.printToGui)
+
 
         #处理下载按钮
         self.ui.pushButton.clicked.connect(self.handleCalc)
@@ -133,8 +134,9 @@ class Downloader(QWidget, Ui_Form):
 
 if __name__ == '__main__':
     app = QApplication([])
-    donloader = Downloader()
-    donloader.show()
+    downloader = Downloader()
+    setTheme(Theme.LIGHT)
+    downloader.show()
     app.exec()    
 
         
