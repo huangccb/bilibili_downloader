@@ -170,7 +170,7 @@ class Ui_Form(object):
         self.label_2.setText(_translate("Form", "视频链接："))
         self.urlEdit.setPlaceholderText(_translate("Form", "多个链接请以空格或换行分割"))
         self.label_3.setText(_translate("Form", "cookie："))
-        self.linkButton.setText(_translate("Form", "如何获取ookie?"))
+        self.linkButton.setText(_translate("Form", "如何获取Cookie?"))
         self.label_4.setText(_translate("Form", "下载路径："))
         self.outPath.setPlaceholderText(_translate("Form", "默认为视频文件夹"))
         self.label_5.setText(_translate("Form", "解码器："))

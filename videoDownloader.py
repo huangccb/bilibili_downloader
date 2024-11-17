@@ -17,20 +17,16 @@ class VideoDownloader():
 
         if os.path.exists(putOutPath): return putOutPath
         self.selfPath = os.path.dirname(os.path.abspath(__file__))
+        
         #判断是否使用ffmpeg
         if self.urlDecoder == "ffmpeg":
-            
-            # print(f"start .\\downloader\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
             os.system(f"{self.selfPath}\\downloader\\ffmpeg\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
-            
-            # ffmpeg.concat(ffmpeg.input(vdPath), ffmpeg.input(adPath), v=1, a=1).output(putOutPath).run()
         else:
             os.system(f"{self.selfPath}\\downloader\\moviepy\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
-        return putOutPath
 
 
     #获取视频 
-    def getVideo(self, url, cookie, outPath, urlDecoder, index, tempPath):
+    def getVideo(self, url, cookie, outPath, urlDecoder, tempPath):
         
         self.tempPath = tempPath
         self.outPath = outPath
@@ -51,7 +47,7 @@ class VideoDownloader():
 
 
         #获取标题
-        self.title = ("视频标题：" + re.findall('title="(.*?)"', resPage)[0])
+        self.title = re.findall('title="(.*?)"', resPage)[0]
 
         #获取音频和视频信息
         videoInfo = re.findall('window.__playinfo__=(.*?)</script>',resPage)[0]
@@ -71,4 +67,5 @@ class VideoDownloader():
                 a.write(audioContent)
        
         # 合并视频
-        result = self.writeVideo(adPath = f"{self.tempPath}\\{self.title}.mp3", vdPath = f"{self.tempPath}\\{self.title}.mp4")
+        self.writeVideo(adPath = f"{self.tempPath}\\{self.title}.mp3", vdPath = f"{self.tempPath}\\{self.title}.mp4")
+        return self.title
