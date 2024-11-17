@@ -2,9 +2,9 @@ from PyQt6.QtWidgets import *
 from threading import Thread
 from PyQt6.QtCore import pyqtSignal
 import traceback, re, os, tempfile
-from multiprocessing import Pool
 from videoDownloader import VideoDownloader
 from guiFiles.main_ui import Ui_Form
+from concurrent.futures import ThreadPoolExecutor
 
 
 from qfluentwidgets import setTheme, Theme
@@ -58,7 +58,6 @@ class Downloader(QWidget, Ui_Form):
         self.ui.outBrowser.append(str(text))
         self.ui.outBrowser.ensureCursorVisible()
 
-
     #清除日志
     def clearText(self):
         self.ui.outBrowser.clear()
@@ -67,60 +66,54 @@ class Downloader(QWidget, Ui_Form):
     def handleCalc(self):
 
         # #获取变量并执行下载任务
-        urlText = re.split(' |\n',self.ui.urlEdit.toPlainText())
-        cookie = self.ui.cookieEdit.text()
-        urlDecoder = self.ui.comboBox.currentText()
-        outPath = self.ui.outPath.text()
-        if outPath == '':
-            outPath = os.path.expanduser('~') + '\\Videos'  #设置默认文件夹为视频文件夹
+        self.urlText = re.split(' |\n',self.ui.urlEdit.toPlainText())
+        self.cookie = self.ui.cookieEdit.text()
+        self.urlDecoder = self.ui.comboBox.currentText()
+        self.outPath = self.ui.outPath.text()
+        if self.outPath == '':
+            self.outPath = os.path.expanduser('~') + '\\Videos'  #设置默认文件夹为视频文件夹
 
-        thread = Thread(target=self.download,
-                        args=(urlText, cookie, urlDecoder, outPath), daemon=True
 
-        )
-        thread.start()
-            
+        self.ms.text_print.emit(f"视频开始下载，保存路径：{self.outPath}")
+        #多线程执行，利用线程池
+
+        startThread = Thread(target=self.startDownload, daemon=True)
+        startThread.start()        
+        
+    def startDownload(self):
+        self.executor = ThreadPoolExecutor(max_workers=2)
+        for url in self.urlText:
+            self.executor.submit(self.download, url=url)        
+        self.executor.shutdown(wait=True)
+        self.ms.text_print.emit("所有视频已下载！！！")
         
 
-        
 
-
-    def download(self,urls, cookie, urlDecoder, outPath):
+    def download(self, url):
 
         #写入缓存文件
-        if os.path.exists(self.tempPath + '\\cookie.txt') == False or cookie != self.tempCookie:
+        if os.path.exists(self.tempPath + '\\cookie.txt') == False or self.cookie != self.tempCookie:
             with open(self.tempPath + '\\cookie.txt', 'w', encoding='utf-8') as f:
-                f.write(cookie)
+                f.write(self.cookie)
 
 
-        threadList = []
-        self.pool = Pool(2)
-        self.ms.text_print.emit(f"视频开始下载，保存路径：{outPath}")
-        downloadNum = 0
         #多线程执行，利用线程池
         try:
             videoDownloader = VideoDownloader()
-            for url in urls:
-                downloadNum += 1
+            title = videoDownloader.getVideo(url, self.cookie, self.outPath, self.urlDecoder, self.tempPath)
 
-                threadList.append(self.pool.apply_async(videoDownloader.getVideo, (url, cookie, outPath, urlDecoder, downloadNum, self.tempPath)))
-                
-            self.pool.close()
-            self.pool.join()
+            self.ms.text_print.emit(f"{title}：下载完成")
 
-            self.ms.text_print.emit("所有视频已完成下载")
-
-        except Exception as e:
-            self.pool.terminate()
+        except Exception:
+            # self.pool.terminate()
             self.ms.text_print.emit(f"视频下载失败")                
             self.ms.text_print.emit(traceback.format_exc()) 
+            self.executor.shutdown(now=True)
 
     #关闭窗口前退出进程池
     def closeEvent(self, event):
-        self.pool.terminate()
+        self.executor.shutdown(now=True)
         event.accept()
-
-
 
     #处理Temp缓存文件夹
     def ckeckTemp(self):
@@ -148,5 +141,3 @@ if __name__ == '__main__':
     setTheme(Theme.LIGHT)
     downloader.show()
     app.exec()    
-
-        
