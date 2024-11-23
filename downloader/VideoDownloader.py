@@ -20,13 +20,24 @@ class VideoDownloader():
         
         #判断是否使用ffmpeg
         if self.urlDecoder == "ffmpeg":
-            os.system(f"{self.selfPath}\\downloader\\ffmpeg\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
+            os.system(f"{self.selfPath}\\ffmpeg\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
+            print(self.selfPath)
         else:
-            os.system(f"{self.selfPath}\\downloader\\moviepy\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
+            os.system(f"{self.selfPath}\\moviepy\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
 
+
+    def getVideo(self, url, path, title):
+        videoContent = requests.get(headers=self.headers, url=url).content
+        with open(f"{path}\\{title}.mp4", 'wb') as v:
+            v.write(videoContent)
+        
+    def getAudio(self, url, path, title):
+        audioContent = requests.get(headers=self.headers, url=url).content
+        with open(f"{path}\\{title}.mp3", 'wb') as a:
+            a.write(audioContent)
 
     #获取视频 
-    def getVideo(self, url, cookie, outPath, urlDecoder, tempPath):
+    def getPage(self, url, cookie, outPath, urlDecoder, tempPath):
         
         self.tempPath = tempPath
         self.outPath = outPath
@@ -35,14 +46,14 @@ class VideoDownloader():
 
 
         #头文件
-        headers = {
+        self.headers = {
         "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
         "Referer" : url,
         "cookie" : cookie
         }
 
         #访问主页面
-        resPage = requests.get(url=url, headers=headers).text
+        resPage = requests.get(url=url, headers=self.headers).text
 
 
 
@@ -57,14 +68,10 @@ class VideoDownloader():
 
         #获取视频和音频
         if os.path.exists(f"{self.tempPath}\\{self.title}.mp4") == False:
-            videoContent = requests.get(headers=headers, url=videoUrl).content
-            with open(f"{self.tempPath}\\{self.title}.mp4", 'wb') as v:
-                v.write(videoContent)
+            self.getVideo(url=videoUrl, path=self.tempPath, title=self.title)
         
         if os.path.exists(f"{self.tempPath}\\{self.title}.mp3") == False:
-            audioContent = requests.get(headers=headers, url=audioUrl).content
-            with open(f"{self.tempPath}\\{self.title}.mp3", 'wb') as a:
-                a.write(audioContent)
+            self.getAudio(url=audioUrl, path=self.tempPath, title=self.title)
        
         # 合并视频
         self.writeVideo(adPath = f"{self.tempPath}\\{self.title}.mp3", vdPath = f"{self.tempPath}\\{self.title}.mp4")

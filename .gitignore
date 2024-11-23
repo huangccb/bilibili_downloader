@@ -3,3 +3,4 @@ __pycache__/
 release/
 main.*/
 icon.ico
+*.log
