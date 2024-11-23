@@ -2,9 +2,10 @@ from PyQt6.QtWidgets import *
 from threading import Thread
 from PyQt6.QtCore import pyqtSignal
 import traceback, re, os, tempfile
-from videoDownloader import VideoDownloader
 from guiFiles.main_ui import Ui_Form
 from concurrent.futures import ThreadPoolExecutor
+from downloader.Log import Log
+from downloader.VideoDownloader import VideoDownloader
 
 
 from qfluentwidgets import setTheme, Theme
@@ -91,28 +92,35 @@ class Downloader(QWidget, Ui_Form):
 
     def download(self, url):
 
-        #写入缓存文件
+        #将cookie写入缓存文件
         if os.path.exists(self.tempPath + '\\cookie.txt') == False or self.cookie != self.tempCookie:
             with open(self.tempPath + '\\cookie.txt', 'w', encoding='utf-8') as f:
                 f.write(self.cookie)
 
-
-        #多线程执行，利用线程池
+        #下载视频
         try:
             videoDownloader = VideoDownloader()
-            title = videoDownloader.getVideo(url, self.cookie, self.outPath, self.urlDecoder, self.tempPath)
+            title = videoDownloader.getPage(url, self.cookie, self.outPath, self.urlDecoder, self.tempPath)
 
+
+            self.deleteTemp(self.tempPath + '\\' + title + '.mp3')
+            self.deleteTemp(self.tempPath + '\\' + title + '.mp4')
             self.ms.text_print.emit(f"{title}：下载完成")
 
         except Exception:
-            # self.pool.terminate()
-            self.ms.text_print.emit(f"视频下载失败")                
-            self.ms.text_print.emit(traceback.format_exc()) 
-            self.executor.shutdown(now=True)
+
+            self.ms.text_print.emit(f"视频下载失败，请查看日志")                
+            self.ms.text_print.emit(traceback.format_exc())
+
+            #日志
+            logging = Log()
+            logging.errorLog(traceback.format_exc())
+
+            self.executor.shutdown(wait=False)
 
     #关闭窗口前退出进程池
     def closeEvent(self, event):
-        self.executor.shutdown(now=True)
+        self.executor.shutdown(wait=True)
         event.accept()
 
     #处理Temp缓存文件夹
@@ -123,16 +131,20 @@ class Downloader(QWidget, Ui_Form):
         if os.path.exists(self.tempPath) == False:
             os.makedirs(self.tempPath)
 
-        num_files = 0
-        for root, dirs, files in os.walk(self.tempPath):
-            num_files += len(files)
+        # num_files = 0
+        # for files in os.walk(self.tempPath):
+        #     num_files += len(files)
         
-        if num_files > 15:
-            file_list = os.listdir(self.tempPath)
-            for file in file_list:
-                file_path = os.path.join(self.tempPath, file)
-                if os.path.isfile(file_path) and file != 'cookie.txt':
-                    os.remove(file_path)
+        # if num_files > 15:
+        #     file_list = os.listdir(self.tempPath)
+        #     for file in file_list:
+        #         file_path = os.path.join(self.tempPath, file)
+        #         if file != 'cookie.txt':
+        #             self.deleteTemp(file_path)
+
+    def deleteTemp(self, path):
+        if os.path.exists(path):
+            os.remove(path)
 
 
 if __name__ == '__main__':
