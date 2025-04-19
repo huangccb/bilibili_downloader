@@ -19,16 +19,16 @@ class FinishSignals(QWidget):
 class Downloader(QWidget, Ui_Form):
     
     def __init__(self):
-        
+        self.executor = None
         #加载ui文件
         super().__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-
         #设置cookie链接按钮
         self.ui.linkButton.setUrl("https://blog.csdn.net/qq_28821897/article/details/132002110")
 
         self.tempPath = ''
+        #self.executor = None  # 初始化 executor
         
         #检查Temp文件夹
         self.ckeckTemp()
@@ -115,12 +115,13 @@ class Downloader(QWidget, Ui_Form):
             #日志
             logging = Log()
             logging.errorLog(traceback.format_exc())
-
-            self.executor.shutdown(wait=False)
+            if(self.executor != None):
+                self.executor.shutdown(wait=False)
 
     #关闭窗口前退出进程池
     def closeEvent(self, event):
-        self.executor.shutdown(wait=True)
+        if(self.executor != None):
+            self.executor.shutdown(wait=True)
         event.accept()
 
     #处理Temp缓存文件夹
@@ -130,17 +131,6 @@ class Downloader(QWidget, Ui_Form):
         self.tempPath = tempfile.gettempdir() + "\\bilibili_video"
         if os.path.exists(self.tempPath) == False:
             os.makedirs(self.tempPath)
-
-        # num_files = 0
-        # for files in os.walk(self.tempPath):
-        #     num_files += len(files)
-        
-        # if num_files > 15:
-        #     file_list = os.listdir(self.tempPath)
-        #     for file in file_list:
-        #         file_path = os.path.join(self.tempPath, file)
-        #         if file != 'cookie.txt':
-        #             self.deleteTemp(file_path)
 
     def deleteTemp(self, path):
         if os.path.exists(path):

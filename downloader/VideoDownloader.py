@@ -1,4 +1,4 @@
-from moviepy.editor import *
+from moviepy import *
 import requests, json, re, os, shutil
 from downloader.getWbi import GetWbi
 
@@ -46,14 +46,6 @@ class VideoDownloader():
         with open(f"{path}\\{title}.mp3", 'wb') as a:
             a.write(audioContent)
 
-    #requests请求
-    # def request(self, url, stat, cookies=''):
-        
-    #     if(stat == 'text'):
-    #         return requests.get(url=url, headers=self.headers, cookies=cookies).text
-    #     elif(stat == 'content'):
-    #         return requests.get(url=url, headers=self.headers, cookies=cookies).content
-
     def getInfo(self, sessdata, bvid):
         api = "https://api.bilibili.com/x/web-interface/view"
         params = {
@@ -75,7 +67,7 @@ class VideoDownloader():
         self.tempPath = tempPath
         self.outPath = outPath
         self.urlDecoder = urlDecoder
-        bvid = re.findall("https://www.bilibili.com/video/(.*?)\?.*?", url)[0]
+        bvid = re.findall("https://www.bilibili.com/video/(.*?)/\?.*?", url)[0]
         sessdata = re.findall("SESSDATA=(.*?);", cookie)[0]
         sessdata_cookie = {"SESSDATA":sessdata}
         #获取cid和标题
@@ -95,30 +87,12 @@ class VideoDownloader():
         playUrl = "https://api.bilibili.com/x/player/wbi/playurl?" + paramUrl
         resp = requests.get(url=playUrl, headers=self.headers, cookies=sessdata_cookie).json()
         videoUrl = resp['data']['durl'][0]['url']
-        # resPage = requests.get(url=url, headers=self.headers).text
-
-
-
-
-        # #获取标题
-        # self.title = re.findall('title="(.*?)"', resPage)[0]
-
-        # #获取音频和视频信息
-        # videoInfo = re.findall('window.__playinfo__=(.*?)</script>',resPage)[0]
-        # jsonData = json.loads(videoInfo)
-        # videoUrl = jsonData['data']['dash']['video'][0]['baseUrl']  #视频链接所在位置
-        # audioUrl = jsonData['data']['dash']['audio'][0]['baseUrl']  #音频链接所在位置
 
         #获取视频
         if os.path.exists(f"{self.tempPath}\\{self.title}.mp4") == False:
             self.getVideo(url=videoUrl, path=self.tempPath, title=self.title)
             self.video = True
 
-        
-        # if os.path.exists(f"{self.tempPath}\\{self.title}.mp3") == False:
-        #     self.getAudio(url=audioUrl, path=self.tempPath, title=self.title)
-       
-        # 合并视频
         self.writeVideo(adPath = f"{self.tempPath}\\{self.title}.mp3", vdPath = f"{self.tempPath}\\{self.title}.mp4")
         return self.title
     
