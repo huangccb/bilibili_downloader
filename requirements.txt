@@ -1,0 +1,2 @@
+pyqt6_fluent_widgets==1.7.7
+Requests==2.32.3
