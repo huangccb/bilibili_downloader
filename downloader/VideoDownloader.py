@@ -1,4 +1,4 @@
-from moviepy import *
+#from moviepy import *
 import requests, json, re, os, shutil
 from downloader.getWbi import GetWbi
 
@@ -29,11 +29,11 @@ class VideoDownloader():
         if os.path.exists(putOutPath): return putOutPath
         self.selfPath = os.path.dirname(os.path.abspath(__file__))
         
-        #判断是否使用ffmpeg
-        if self.urlDecoder == "ffmpeg":
-            os.system(f"{self.selfPath}\\ffmpeg\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
-        else:
-            os.system(f"{self.selfPath}\\moviepy\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
+        # #判断是否使用ffmpeg
+        # if self.urlDecoder == "ffmpeg":
+        #     os.system(f"{self.selfPath}\\ffmpeg\\bin\\ffmpeg.exe -i {vdPath} -i {adPath} -c:v copy -c:a copy -bsf:a aac_adtstoasc {putOutPath}")
+        # else:
+        #     os.system(f"{self.selfPath}\\moviepy\\moviepyDownload.exe --vdPath={vdPath} --adPath={adPath} --outPath={putOutPath}")
 
 
     def getVideo(self, url, path, title):
